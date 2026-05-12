@@ -1,58 +1,4 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: test-app
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: app-deployment-blue
-  namespace: test-app
-  labels:
-    app: petclinc
-    version: blue
-spec:
-  replicas: 5
-  selector:
-    matchLabels:
-      app: petclinc
-      version: blue
-  template:
-    metadata:
-      labels:
-        app: petclinc
-        version: blue
-    spec:
-      containers:
-        - name: petclinic
-          image: tne729/petclinc:main
-          ports:
-            - containerPort: 8080
-              name: http
-          resources:
-            requests:
-              cpu: "200m"
-              memory: "512Mi"
-            limits:
-              cpu: "500m"
-              memory: "1Gi"
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 120
-            periodSeconds: 15
-            timeoutSeconds: 5
-            failureThreshold: 3
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,7 +10,7 @@ metadata:
   annotations:
     harness.io/direct-apply: "true"
 spec:
-  replicas: 0
+  replicas: 5
   selector:
     matchLabels:
       app: petclinc
@@ -79,7 +25,7 @@ spec:
         - name: petclinic
           image: tne729/petclinc:main
           ports:
-            - containerPort: 8080
+            - containerPort: 80
               name: http
           resources:
             requests:
@@ -99,7 +45,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: 8080
+              port: 80
             initialDelaySeconds: 120
             periodSeconds: 15
             timeoutSeconds: 5
@@ -121,7 +67,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 8080
+      targetPort: 80
       protocol: TCP
 ---
 apiVersion: v1
@@ -140,7 +86,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 8080
+      targetPort: 80
       protocol: TCP
 ---
 apiVersion: policy/v1
