@@ -23,11 +23,11 @@ spec:
       - name: petclinic
         image: tne729/petclinc:main
         ports:
-        - containerPort: 80        # ← was 8080
+        - containerPort: 8080        # ← was 8080
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: 80               # ← was 8080
+            port: 8080               # ← was 8080
           initialDelaySeconds: 120  # ← increased, app takes ~60-70s to start
           periodSeconds: 10
           timeoutSeconds: 5
@@ -35,7 +35,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: 80               # ← was 8080
+            port: 8080               # ← was 8080
           initialDelaySeconds: 90  # ← was 60
           periodSeconds: 10
           timeoutSeconds: 5
@@ -68,7 +68,7 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 80               # ← was 8080
+    targetPort: 8080              # ← was 8080
   type: ClusterIP
 ---
 apiVersion: v1
@@ -88,5 +88,5 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 80               # ← was 8080
+    targetPort: 8080               # ← was 8080
   type: ClusterIP
