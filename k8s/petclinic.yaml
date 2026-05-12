@@ -25,7 +25,7 @@ spec:
         - name: petclinic
           image: tne729/petclinc:main
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           resources:
             requests:
@@ -45,7 +45,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 120
             periodSeconds: 15
             timeoutSeconds: 5
@@ -67,7 +67,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 80
+      targetPort: 8080
       protocol: TCP
 ---
 apiVersion: v1
@@ -86,7 +86,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 80
+      targetPort: 8080
       protocol: TCP
 ---
 apiVersion: policy/v1
