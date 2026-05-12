@@ -1,42 +1,107 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-app
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-deployment
+  name: app-deployment-blue
   namespace: test-app
   labels:
-    app: app-deployment
+    app: petclinc
+    version: blue
 spec:
   replicas: 5
   selector:
     matchLabels:
-      app: app-deployment
+      app: petclinc
+      version: blue
   template:
     metadata:
       labels:
-        app: app-deployment
+        app: petclinc
+        version: blue
     spec:
       containers:
-        - name: deployment
+        - name: petclinic
           image: tne729/petclinc:main
+          ports:
+            - containerPort: 8080
+              name: http
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: "200m"
+              memory: "512Mi"
             limits:
-              cpu: "300m"
-              memory: "256Mi"
+              cpu: "500m"
+              memory: "1Gi"
           readinessProbe:
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 1
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment-green
+  namespace: test-app
+  labels:
+    app: petclinc
+    version: green
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: petclinc
+      version: green
+  template:
+    metadata:
+      labels:
+        app: petclinc
+        version: green
+    spec:
+      containers:
+        - name: petclinic
+          image: tne729/petclinc:main
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -51,7 +116,8 @@ spec:
     app: petclinc
     version: blue
   ports:
-    - port: 8080
+    - name: http
+      port: 80
       targetPort: 8080
       protocol: TCP
 ---
@@ -68,7 +134,8 @@ spec:
     app: petclinc
     version: green
   ports:
-    - port: 8080
+    - name: http
+      port: 80
       targetPort: 8080
       protocol: TCP
 ---
@@ -92,7 +159,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: petclinc-blue
+    name: app-deployment-blue
   minReplicas: 2
   maxReplicas: 10
   metrics:
