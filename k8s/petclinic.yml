@@ -1,64 +1,103 @@
+apiversion: apps/v1
+Kind: Deployment
+metadata:
+  name: app-deployment
+  namespace: test-app
+  lables:
+    app: app-deployment
+spec:
+  replicas: 5
+  selector:
+    matchlabels:
+      app: app-deployment
+  template:
+    metadata:
+      app: app-deployment
+  spec:
+    containers:
+      - name: deployment
+        image: tne729/petclinc:main
+        resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 1
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: petclinic
+  name: petclinc-service-primary
+  namespace: test-app
+  annotations:
+    harness.io/primary-service: "true"
 spec:
-  type: NodePort
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: blue
   ports:
     - port: 80
-      targetPort: 8080
-  selector:
-    app: petclinic
-
+      targetPort: 80
+      protocol: TCP
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Service
 metadata:
-  name: petclinic
-  labels:
-    app: petclinic
+  name: petclinc-service-stage
+  namespace: test-app
+  annotations:
+    harness.io/stage-service: "true"
 spec:
-  replicas: 1
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: green
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: petclinc-pdb
+  namespace: test-app
+spec:
+  minAvailable: 2
   selector:
     matchLabels:
-      app: petclinic
-  template:
-    metadata:
-      labels:
-        app: petclinic
-    spec:
-      containers:
-        - name: workload
-          image: dsyer/petclinic
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: postgres
-            - name: SERVICE_BINDING_ROOT
-              value: /bindings
-            - name: SPRING_APPLICATION_JSON
-              value: |
-                {
-                  "management.endpoint.health.probes.add-additional-paths": true
-                }
-          ports:
-            - name: http
-              containerPort: 8080
-          livenessProbe:
-            httpGet:
-              path: /livez
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /readyz
-              port: http
-          volumeMounts:
-            - mountPath: /bindings/secret
-              name: binding
-              readOnly: true
-      volumes:
-        - name: binding
-          projected:
-            sources:
-              - secret:
-                  name: demo-db
+      app: petclinc
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: petclinc-hpa
+  namespace: test-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: petclinc-blue
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
