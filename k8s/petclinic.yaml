@@ -1,3 +1,416 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment-blue
+  namespace: test-app
+  labels:
+    app: petclinc
+    version: blue
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: petclinc
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: petclinc
+        version: blue
+    spec:
+      containers:
+        - name: petclinic
+          image: tne729/petclinc:main
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinc-service-primary
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+    harness.io/primary-service: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: blue
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinc-service-stage
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+    harness.io/stage-service: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: green
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: petclinc-pdb
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: petclinc
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: petclinc-hpa
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-deployment-blue
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment-blue
+  namespace: test-app
+  labels:
+    app: petclinc
+    version: blue
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: petclinc
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: petclinc
+        version: blue
+    spec:
+      containers:
+        - name: petclinic
+          image: tne729/petclinc:main
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinc-service-primary
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+    harness.io/primary-service: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: blue
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinc-service-stage
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+    harness.io/stage-service: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: green
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: petclinc-pdb
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: petclinc
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: petclinc-hpa
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-deployment-blue
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment-blue
+  namespace: test-app
+  labels:
+    app: petclinc
+    version: blue
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: petclinc
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: petclinc
+        version: blue
+    spec:
+      containers:
+        - name: petclinic
+          image: tne729/petclinc:main
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinc-service-primary
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+    harness.io/primary-service: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: blue
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinc-service-stage
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+    harness.io/stage-service: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: petclinc
+    version: green
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: petclinc-pdb
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: petclinc
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: petclinc-hpa
+  namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-deployment-blue
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment-blue
+  namespace: test-app
+  labels:
+    app: petclinc
+    version: blue
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: petclinc
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: petclinc
+        version: blue
+    spec:
+      containers:
+        - name: petclinic
+          image: tne729/petclinc:main
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
 apiVersion: v1
 kind: Service
 metadata:
