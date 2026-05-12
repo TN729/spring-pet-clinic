@@ -61,6 +61,8 @@ metadata:
   labels:
     app: petclinc
     version: green
+  annotations:
+    harness.io/direct-apply: "true"
 spec:
   replicas: 0
   selector:
@@ -109,6 +111,7 @@ metadata:
   name: petclinc-service-primary
   namespace: test-app
   annotations:
+    harness.io/direct-apply: "true"
     harness.io/primary-service: "true"
 spec:
   type: ClusterIP
@@ -127,6 +130,7 @@ metadata:
   name: petclinc-service-stage
   namespace: test-app
   annotations:
+    harness.io/direct-apply: "true"
     harness.io/stage-service: "true"
 spec:
   type: ClusterIP
@@ -144,6 +148,8 @@ kind: PodDisruptionBudget
 metadata:
   name: petclinc-pdb
   namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
 spec:
   minAvailable: 2
   selector:
@@ -155,6 +161,8 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: petclinc-hpa
   namespace: test-app
+  annotations:
+    harness.io/direct-apply: "true"
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
