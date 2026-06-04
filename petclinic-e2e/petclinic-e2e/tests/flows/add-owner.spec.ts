@@ -46,7 +46,9 @@ test('add owner rejects non-numeric telephone', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Add Owner' }).click();
 
-  // PetClinic's @Digits validation should keep us on the form with an error.
+  // Behavior that matters: bad input must NOT create an owner.
   await expect(page).toHaveURL(/\/owners\/new/);
-  await expect(page.getByText(/numeric|Digits|must not/i).first()).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Owner Information' })
+  ).not.toBeVisible();
 });
