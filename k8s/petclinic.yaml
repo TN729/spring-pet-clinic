@@ -21,7 +21,7 @@ spec:
         command: ['sh', '-c', 'echo "Giving app time to initialize..."; sleep 10']
       containers:
       - name: petclinic
-        image: tne729/petclinc:main
+        image: tne729/petclinc:<+artifact.image>
         ports:
         - containerPort: 8080        # ← was 8080
         livenessProbe:
