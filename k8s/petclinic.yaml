@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: petclinic-blue
-  namespace: test-app
+  namespace: spring-petclinic-ci
 spec:
   replicas: 2
   selector:
@@ -55,7 +55,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: petclinic-svc-1
-  namespace: test-app
+  namespace: spring-petclinic-ci
   labels:
     harness.io/color: blue
     version: "1"
@@ -75,7 +75,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: petclinic-svc-stage-2
-  namespace: test-app
+  namespace: spring-petclinic-ci
   labels:
     harness.io/color: green
     version: "2"
